@@ -15,17 +15,29 @@ const EditPrompt = () => {
         tag:''
     });
 
+    const [loading, setLoading] = useState(true); // Added loading state
+
     useEffect(()=>{
       const getPromptDetails = async() => {
-        const response = await fetch(`/api/prompt/${promptId}`);
-        const data = await response.json();
+        if(!promptId) return;
 
-        setpost({
-            prompt: data.prompt,
-            tag: data.tag
-        });
-      }
-      if(promptId) getPromptDetails();
+        try {
+          const response = await fetch(`/api/prompt/${promptId}`);
+          const data = await response.json();
+  
+          setpost({
+              prompt: data.prompt,
+              tag: data.tag
+          });
+          
+        } catch (error) {
+           console.error('Failed to fetch prompt details:', error);
+        } finally {
+          setLoading(false); // Set loading to false after data is fetched
+        }
+      };
+       
+       getPromptDetails();
     }, [promptId]);
 
     const editingPrompt = async(e) =>{
@@ -55,6 +67,11 @@ const EditPrompt = () => {
         }
 
     }
+
+    if (loading) { // Conditional rendering based on loading state
+      return <div>Loading...</div>;
+    }
+    
   return (
    <Suspense fallback={<div>Loading...</div>}>
     <Form 
