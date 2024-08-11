@@ -1,5 +1,5 @@
 "use client";
-import {Suspense, useEffect, useState} from 'react'
+import { useEffect, useState} from 'react'
 import { useRouter, useSearchParams } from 'next/navigation';
 import Form from '@components/form';
 
@@ -71,9 +71,8 @@ const EditPrompt = () => {
     if (loading) { // Conditional rendering based on loading state
       return <div>Loading...</div>;
     }
-    
   return (
-   <Suspense fallback={<div>Loading...</div>}>
+
     <Form 
       type="Update"
       post={post}
@@ -82,7 +81,7 @@ const EditPrompt = () => {
       handleSubmit={editingPrompt}
       
     />
-   </Suspense>
+   
   )
 }
 
