@@ -1,88 +1,81 @@
 "use client";
-import { useEffect, useState} from 'react'
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Form from '@components/form';
+import Form from '@components/Form';
 
 const EditPrompt = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const promptId = searchParams.get('id');
 
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const promptId = searchParams.get('id');
+  const [submitting, setSubmitting] = useState(false);
+  const [post, setPost] = useState({ prompt: '', tag: '' });
+  const [loading, setLoading] = useState(true); // Loading state with useState
 
-    const [submitting, setsubmitting] = useState(false);
-    const [post, setpost] = useState({
-        prompt:'',
-        tag:''
-    });
+  useEffect(() => {
+    const getPromptDetails = async () => {
+      if (!promptId) return;
 
-    const [loading, setLoading] = useState(true); // Added loading state
+      try {
+        const response = await fetch(`/api/prompt/${promptId}`);
+        const data = await response.json();
 
-    useEffect(()=>{
-      const getPromptDetails = async() => {
-        if(!promptId) return;
+        setPost({
+          prompt: data.prompt,
+          tag: data.tag
+        });
+      } catch (error) {
+        console.error('Failed to fetch prompt details:', error);
+      } finally {
+        setLoading(false); // Stop loading after fetching
+      }
+    };
 
-        try {
-          const response = await fetch(`/api/prompt/${promptId}`);
-          const data = await response.json();
-  
-          setpost({
-              prompt: data.prompt,
-              tag: data.tag
-          });
-          
-        } catch (error) {
-           console.error('Failed to fetch prompt details:', error);
-        } finally {
-          setLoading(false); // Set loading to false after data is fetched
-        }
-      };
-       
-       getPromptDetails();
-    }, [promptId]);
+    getPromptDetails();
+  }, [promptId]);
 
-    const editingPrompt = async(e) =>{
-        e.preventDefault();
-        setsubmitting(true);
+  const editingPrompt = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
 
-        if(!promptId) return alert('Prompt ID not found!');
+    if (!promptId) return alert('Prompt ID not found!');
 
-        try {
-          const response = await fetch(`/api/prompt/${promptId}`,{
-            method: 'PATCH',
-            body: JSON.stringify({
-              prompt: post.prompt,
-              tag: post.tag
-            })
-          })
+    try {
+      const response = await fetch(`/api/prompt/${promptId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          prompt: post.prompt,
+          tag: post.tag
+        })
+      });
 
-          if(response.ok){
-            console.log('Submitted');
-            router.push('/');
-          }
-          
-        } catch (error) {
-          console.log(error);
-        } finally {
-          setsubmitting(false);
-        }
-
+      if (response.ok) {
+        console.log('Submitted');
+        router.push('/');
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setSubmitting(false);
     }
+  };
 
-    if (loading) { // Conditional rendering based on loading state
-      return <div>Loading...</div>;
-    }
+  // Use useState's loading logic for initial loading state
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Form
+        type="Update"
+        post={post}
+        setpost={setPost}
+        submitting={submitting}
+        handleSubmit={editingPrompt}
+      />
+    </Suspense>
+  );
+};
 
-    <Form 
-      type="Update"
-      post={post}
-      setpost={setpost}
-      submitting={submitting}
-      handleSubmit={editingPrompt}
-      
-    />
-   
-  )
-}
-
-export default EditPrompt
+export default EditPrompt;
