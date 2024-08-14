@@ -18,6 +18,13 @@ const Feed = () => {
     }
 
     fetchPosts();
+
+    // Set up polling
+    const intervalId = setInterval(fetchPosts, 5000); // Fetch every 5 seconds
+
+    // Cleanup function to clear the interval on unmount
+    return () => clearInterval(intervalId);
+
   }, []);
   
   const SearchPromptsResults = (searchtext) => {

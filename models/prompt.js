@@ -4,6 +4,7 @@ const PromptSchema = new Schema({
     creator:{
         type: Schema.Types.ObjectId, //a document in mongoose(a user)
         ref: 'User',
+        required: true
     },
     prompt:{
         type: String,
